@@ -371,7 +371,6 @@ bool Workbook::copySheet(int index, const QString &newName)
     AbstractSheet *sheet = d->sheets[index]->copy(worksheetName, d->last_sheet_id);
     d->sheets.append(QSharedPointer<AbstractSheet> (sheet));
     d->sheetNames.append(sheet->sheetName());
-
     return false;
 }
 
@@ -460,13 +459,13 @@ void Workbook::saveToXmlFile(QIODevice *device) const
     writer.writeAttribute(QStringLiteral("xmlns:r"), QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships"));
 
     writer.writeAttribute(QStringLiteral("xmlns:mc"), QStringLiteral("http://schemas.openxmlformats.org/markup-compatibility/2006"));
-
     writer.writeAttribute(QStringLiteral("mc:Ignorable"), QStringLiteral("x15 xr xr6 xr10 xr2"));
     writer.writeAttribute(QStringLiteral("xmlns:x15"), QStringLiteral("http://schemas.microsoft.com/office/spreadsheetml/2010/11/main"));
     writer.writeAttribute(QStringLiteral("xmlns:xr"), QStringLiteral("http://schemas.microsoft.com/office/spreadsheetml/2014/revision"));
     writer.writeAttribute(QStringLiteral("xmlns:xr6"), QStringLiteral("http://schemas.microsoft.com/office/spreadsheetml/2016/revision6"));
     writer.writeAttribute(QStringLiteral("xmlns:xr10"), QStringLiteral("http://schemas.microsoft.com/office/spreadsheetml/2016/revision10"));
     writer.writeAttribute(QStringLiteral("xmlns:xr2"), QStringLiteral("http://schemas.microsoft.com/office/spreadsheetml/2015/revision2"));
+
 
     writer.writeEmptyElement(QStringLiteral("fileVersion"));
     writer.writeAttribute(QStringLiteral("appName"), QStringLiteral("xl"));
@@ -496,16 +495,14 @@ void Workbook::saveToXmlFile(QIODevice *device) const
     writer.writeAttribute(QStringLiteral("yWindow"), d->y_window);
     writer.writeAttribute(QStringLiteral("windowWidth"), d->window_width);
     writer.writeAttribute(QStringLiteral("windowHeight"), d->window_height);
-    if(!(d->xr2uid.isEmpty()))
-        writer.writeAttribute(QStringLiteral("xr2:uid"), d->xr2uid);
-
 
     //Store the firstSheet when it isn't the default
     //For example, when "the first sheet 0 is hidden", the first sheet will be 1
     if (d->firstsheet > 0)
         writer.writeAttribute(QStringLiteral("firstSheet"), QString::number(d->firstsheet));
     //Store the activeTab when it isn't the first sheet
-
+//	if (d->activesheetIndex > 0)
+//        writer.writeAttribute(QStringLiteral("activeTab"), QString::number(d->activesheetIndex));
     writer.writeEndElement();//bookViews
 
     writer.writeStartElement(QStringLiteral("sheets"));

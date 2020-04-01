@@ -232,6 +232,7 @@ Worksheet *Worksheet::copy(const QString &distName, int distId) const
     sheet_d->VZoomScaleNormal=d->VZoomScaleNormal;
     sheet_d->VWorkbookViewId=d->VWorkbookViewId;
     sheet_d->Vsqref=d->Vsqref;
+    sheet_d->Vactive=d->Vactive;
 
 	return sheet;
 }
@@ -1195,27 +1196,39 @@ void Worksheet::saveToXmlFile(QIODevice *device) const
 	writer.writeAttribute(QStringLiteral("xmlns:r"), QStringLiteral("http://schemas.openxmlformats.org/officeDocument/2006/relationships"));
 
 	//for Excel 2010
-	//    writer.writeAttribute("xmlns:mc", "http://schemas.openxmlformats.org/markup-compatibility/2006");
-	//    writer.writeAttribute("xmlns:x14ac", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
-	//    writer.writeAttribute("mc:Ignorable", "x14ac");
+        writer.writeAttribute("xmlns:mc", "http://schemas.openxmlformats.org/markup-compatibility/2006");
+        writer.writeAttribute("mc:Ignorable", "x14ac xr xr2 xr3");
+        writer.writeAttribute("xmlns:x14ac", "http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac");
 
-	writer.writeStartElement(QStringLiteral("dimension"));
-	writer.writeAttribute(QStringLiteral("ref"), d->generateDimensionString());
-	writer.writeEndElement();//dimension
+        writer.writeAttribute("xmlns:xr", "http://schemas.microsoft.com/office/spreadsheetml/2014/revision");
+        writer.writeAttribute("xmlns:xr2", "http://schemas.microsoft.com/office/spreadsheetml/2015/revision2");
+        writer.writeAttribute("xmlns:xr3", "http://schemas.microsoft.com/office/spreadsheetml/2016/revision3");
+        writer.writeAttribute("xr:uid", "{00000000-0001-0000-0000-000000000000}");
+
+
+//	writer.writeStartElement(QStringLiteral("dimension"));
+//	writer.writeAttribute(QStringLiteral("ref"), d->generateDimensionString());
+//	writer.writeEndElement();//dimension
     // Liu fei jin 2019/12/2
-//    writer.writeStartElement(QStringLiteral("sheetPr"));
-//    writer.writeStartElement(QStringLiteral("pageSetUpPr"));
-//    if(!d->VFitTopage.isEmpty())
-//        writer.writeAttribute("fitToPage", d->VFitTopage.trimmed());
-//    writer.writeEndElement();//sheetPr
-//    writer.writeEndElement();//pageSetUpPr
+
+    if(!d->VFitTopage.isEmpty()){
+        writer.writeStartElement(QStringLiteral("sheetPr"));
+        writer.writeEmptyElement(QStringLiteral("pageSetUpPr"));
+        writer.writeAttribute("fitToPage", d->VFitTopage.trimmed());
+        writer.writeEndElement();//pageSetUpPr
+    }
+    writer.writeEmptyElement(QStringLiteral("dimension"));
+    writer.writeAttribute(QStringLiteral("ref"), d->generateDimensionString());
 
 
 	writer.writeStartElement(QStringLiteral("sheetViews"));
 	writer.writeStartElement(QStringLiteral("sheetView"));
-    // Liu fei jin 2019/12/2
-    if (!d->VWorkbookViewId.isEmpty())
+    // Liu fei jin 2020/4/1
+    if (!d->VWorkbookViewId.isEmpty()){
        writer.writeAttribute(QStringLiteral("workbookViewId"), d->VWorkbookViewId);
+	}else{    // for new empty file to be add the default 0 
+	   writer.writeAttribute(QStringLiteral("workbookViewId"), QStringLiteral("0"));
+    }
     if (!d->VSheetView.isEmpty())
        writer.writeAttribute(QStringLiteral("view"), d->VSheetView);
     if (!d->VTopLeftCell.isEmpty())
@@ -1243,11 +1256,11 @@ void Worksheet::saveToXmlFile(QIODevice *device) const
 		writer.writeAttribute(QStringLiteral("showOutlineSymbols"), QStringLiteral("0"));
 	if (!d->showWhiteSpace)
 		writer.writeAttribute(QStringLiteral("showWhiteSpace"), QStringLiteral("0"));
-//    if(!d->Vsqref.isEmpty()){
-//        writer.writeStartElement("selection");
-//        writer.writeAttribute(QStringLiteral("sqref"), d->Vsqref);
-//        writer.writeEndElement();
-//    }
+    if(!d->Vsqref.isEmpty()){
+        writer.writeEmptyElement(QStringLiteral("selection"));
+        writer.writeAttribute(QStringLiteral("activeCell"), d->Vactive);
+        writer.writeAttribute(QStringLiteral("sqref"), d->Vsqref);
+    }
 
     writer.writeEndElement();//sheetView
     writer.writeEndElement();//sheetViews
@@ -2438,6 +2451,7 @@ void WorksheetPrivate::loadXmlSheetViews(QXmlStreamReader &reader)
         if (reader.tokenType() == QXmlStreamReader::StartElement && reader.name() == QLatin1String("selection")) {
             QXmlStreamAttributes attrs = reader.attributes();
             Vsqref=attrs.value(QLatin1String("sqref")).toString().trimmed();
+            Vactive=attrs.value(QLatin1String("activeCell")).toString().trimmed();
         }
 	}
 }
