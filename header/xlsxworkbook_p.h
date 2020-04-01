@@ -1,4 +1,4 @@
-/****************************************************************************
+﻿/****************************************************************************
 ** Copyright (c) 2013-2014 Debao Zhang <hello@debao.me>
 ** All right reserved.
 **
@@ -94,7 +94,7 @@ public:
     QString xr2uid="";   // liu fei jin 2019-07-28
 
     int activesheetIndex;
-    int activeTab;       // liu fei jin 2019-07-28
+    int activeTab=1;       // liu fei jin 2019-07-28
     int firstsheet=0;
     int table_count;
 

@@ -272,6 +272,7 @@ public:
     QString VZoomScaleNormal;
     QString VWorkbookViewId;
     QString Vsqref;
+    QString Vactive;
 
     QRegularExpression urlPattern;
 
