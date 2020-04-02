@@ -489,8 +489,8 @@ void Workbook::saveToXmlFile(QIODevice *device) const
     writer.writeEmptyElement(QStringLiteral("workbookView"));
    // if (!d->xr2uid.isEmpty())
    //    writer.writeAttribute(QStringLiteral("xr2:uid"), d->xr2uid);
-    if (d->activeTab > 0)
-        writer.writeAttribute(QStringLiteral("activeTab"), QString::number(d->activeTab));
+//    if (d->activeTab > 0)   any time we no need it , the selected mark will be set in each sheet selected="1" or "0" 2020 4-2
+//        writer.writeAttribute(QStringLiteral("activeTab"), QString::number(d->activeTab));
     writer.writeAttribute(QStringLiteral("xWindow"), d->x_window);
     writer.writeAttribute(QStringLiteral("yWindow"), d->y_window);
     writer.writeAttribute(QStringLiteral("windowWidth"), d->window_width);
